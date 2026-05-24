@@ -1,369 +1,405 @@
 <!DOCTYPE html>
-
-<html lang="es"><head>
+<html lang="es">
+<head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Circuito CHI-03 - Sistema de Gestión Administrativa"/>
+<meta name="theme-color" content="#005bbf"/>
+
 <title>Circuito CHI-03 Admin</title>
-<!-- BEGIN: PWA Manifest -->
-<link href="manifest.json" rel="manifest"/>
-<meta content="#005bbf" name="theme-color"/>
-<!-- END: PWA Manifest -->
-<!-- BEGIN: External Resources -->
+
+<!-- PWA Manifest - Inline JSON to avoid 404 on GH Pages -->
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiQ0hJLTAzIEFkbWluIiwic2hvcnRfbmFtZSI6IkNISTAzIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiMwMDViYmYiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4uanNkZWxpdnIubmV0L2doL3dpbmcuanMvd2luZ0B2MS4wLjAvbG9nby5zdmciLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnIn1dfQ=="/>
+
+<!-- External Resources with SRI for security and reliability -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
 <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#005bbf',
-                        secondary: '#006e2c',
-                        surface: '#f7f9ff',
-                    }
+    tailwind.config = {
+        darkMode: 'class',
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#005bbf',
+                    secondary: '#006e2c',
+                    surface: '#f7f9ff',
                 }
             }
         }
-    </script>
-<!-- END: External Resources -->
-<style data-purpose="custom-styling">
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease;
-        }
+    }
+</script>
 
-        .dark body {
-            background-color: #0f172a;
-        }
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
+    body {
+        font-family: 'Inter', sans-serif;
+        transition: background-color 0.3s ease;
+    }
 
-        .nav-active {
-            color: #005bbf;
-            font-weight: 600;
-        }
+    .dark body {
+        background-color: #0f172a;
+    }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
 
-        .toast {
-            animation: slideIn 0.3s ease-out forwards;
-        }
-        @keyframes slideIn {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-    </style>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    .nav-active {
+        color: #005bbf;
+        font-weight: 600;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .toast {
+        animation: slideIn 0.3s ease-out forwards;
+    }
+    @keyframes slideIn {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Fix for GitHub Pages - ensure drop zones work properly */
+    .drop-target {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .processing-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<base target="_blank">
 </head>
 <body class="min-h-screen pb-24 bg-surface dark:bg-slate-900 transition-colors duration-300">
-<!-- BEGIN: MainHeader -->
-<header class="sticky top-0 z-50 bg-white dark:bg-slate-800 shadow-sm px-4 py-3 flex items-center justify-between" data-purpose="header">
-<div class="flex items-center gap-3">
-<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
-<i class="fa-solid fa-shield-halved text-xl"></i>
-</div>
-<div class="cursor-pointer group" id="identity-container" title="Doble clic para editar">
-<h1 class="text-lg font-bold text-gray-800 dark:text-white leading-tight" id="main-title">CHI-03 Admin</h1>
-<p class="text-xs text-gray-500 dark:text-gray-400" id="sub-title">Gestión de Circuito</p>
-</div>
-</div>
-<div class="flex items-center gap-4">
-<button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" data-purpose="theme-toggle" id="darkModeToggle">
-<i class="fa-solid fa-moon text-gray-600 dark:text-gray-300"></i>
-</button>
-<div class="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden cursor-pointer">
-<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBchjjPVbsgIy4_XjOz3jqKW2EnGIlF_d3F7znrwQWm7Ewm2BBUOCbm4u69EhewmDoCBc2JUfckme6Gcvpv3cBPO6Y07s2uHYxO5e_dMF5SQecp4gmBcKQ4X9IHmDqIkndC2Hum52cn70n8_b27CDI9Qcro7uPPmoCWMMJE2jILrMTJxV8KgCKOYrn4JN8GombNBxAiJtQCfqKUoOVsaE8twOeVwYHBAWaQ08TmHw08nFDf09w0pHRJhoVFoSZ_8JAAyueelVc9Sn4H"/>
-</div>
-</div>
+
+<!-- Service Worker Registration for PWA on GH Pages -->
+<script>
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            self.addEventListener('install', e => {
+                e.waitUntil(self.skipWaiting());
+            });
+            self.addEventListener('activate', e => {
+                e.waitUntil(self.clients.claim());
+            });
+            self.addEventListener('fetch', e => {
+                e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
+            });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).catch(() => console.log('SW registration skipped'));
+    }
+</script>
+
+<header class="sticky top-0 z-50 bg-white dark:bg-slate-800 shadow-sm px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
+            <i class="fa-solid fa-shield-halved text-xl"></i>
+        </div>
+        <div class="cursor-pointer group" id="identity-container" title="Doble clic para editar">
+            <h1 class="text-lg font-bold text-gray-800 dark:text-white leading-tight" id="main-title">CHI-03 Admin</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400" id="sub-title">Gestión de Circuito</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <button class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors" id="darkModeToggle">
+            <i class="fa-solid fa-moon text-gray-600 dark:text-gray-300"></i>
+        </button>
+        <div class="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden cursor-pointer bg-gray-200 flex items-center justify-center">
+            <i class="fa-solid fa-user text-gray-400"></i>
+        </div>
+    </div>
 </header>
-<!-- END: MainHeader -->
+
 <main class="max-w-7xl mx-auto p-4 space-y-6">
-<!-- BEGIN: SummaryDashboard -->
-<section class="grid grid-cols-2 md:grid-cols-4 gap-4" data-purpose="stat-cards">
-<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-<div class="flex items-center justify-between mb-2">
-<div class="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
-<i class="fa-solid fa-church text-sm"></i>
-</div>
-</div>
-<p class="text-2xl font-bold text-gray-800 dark:text-white" id="stat-congregations">14</p>
-<p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Congregaciones</p>
-</div>
-<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-<div class="flex items-center justify-between mb-2">
-<div class="w-8 h-8 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg flex items-center justify-center">
-<i class="fa-solid fa-users text-sm"></i>
-</div>
-</div>
-<p class="text-2xl font-bold text-gray-800 dark:text-white">1,248</p>
-<p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Publicadores Activos</p>
-</div>
-<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-<div class="flex items-center justify-between mb-2">
-<div class="w-8 h-8 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center">
-<i class="fa-solid fa-user-tie text-sm"></i>
-</div>
-</div>
-<p class="text-2xl font-bold text-gray-800 dark:text-white">86</p>
-<p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Ancianos y SM</p>
-</div>
-<div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-<div class="flex items-center justify-between mb-2">
-<div class="w-8 h-8 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center">
-<i class="fa-solid fa-person-walking-luggage text-sm"></i>
-</div>
-</div>
-<p class="text-2xl font-bold text-gray-800 dark:text-white">142</p>
-<p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Precursores</p>
-</div>
-</section>
-<!-- END: SummaryDashboard -->
-<!-- BEGIN: QuickActions -->
-<section class="space-y-3" data-purpose="quick-actions">
-<h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Acciones Rápidas</h2>
-<div class="grid grid-cols-2 gap-3">
-<button class="flex items-center justify-center gap-2 bg-primary text-white py-3 px-4 rounded-xl font-medium shadow-md hover:bg-blue-700 transition-all active:scale-95" id="btn-new-congregation">
-<i class="fa-solid fa-plus"></i>
-<span>Nueva Congregación</span>
-</button>
-<button class="flex items-center justify-center gap-2 bg-secondary text-white py-3 px-4 rounded-xl font-medium shadow-md hover:bg-green-700 transition-all active:scale-95" id="btn-import-excel">
-<i class="fa-solid fa-file-import"></i>
-<span>Importar Excel</span>
-</button>
-</div>
-</section>
-<!-- END: QuickActions -->
-<!-- BEGIN: CongregationList -->
-<section class="space-y-4" data-purpose="congregation-management">
-<div class="flex items-center justify-between">
-<h2 class="text-lg font-bold text-gray-800 dark:text-white">Lista de Congregaciones</h2>
-<div class="relative">
-<input class="pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border-none rounded-full text-sm shadow-sm focus:ring-2 focus:ring-primary w-40 md:w-64 dark:text-white" id="search-input" placeholder="Buscar..." type="text"/>
-<i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="congregation-list-container">
-<!-- Congregation Card 1 -->
-<div class="congregation-card bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:border-primary/30 transition-all" data-name="Villa del Mar Norte">
-<div class="flex justify-between items-start mb-3">
-<div>
-<h3 class="font-bold text-gray-800 dark:text-white text-base">Villa del Mar Norte</h3>
-<p class="text-xs text-gray-400">ID: 10425-S</p>
-</div>
-<span class="badge cursor-help px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase" title="Todos los informes mensuales han sido procesados satisfactoriamente.">Stats Cargadas</span>
-</div>
-<div class="space-y-2 mb-4">
-<div class="flex justify-between text-xs dark:text-gray-300">
-<span class="text-gray-500 dark:text-gray-400">Publicadores</span>
-<span class="font-semibold">98</span>
-</div>
-<div class="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-<div class="bg-primary h-full" style="width: 85%"></div>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">
-                        Gestionar S-21
+    <!-- Summary Dashboard -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-church text-sm"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-800 dark:text-white" id="stat-congregations">14</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Congregaciones</p>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-users text-sm"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-800 dark:text-white">1,248</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Publicadores Activos</p>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-user-tie text-sm"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-800 dark:text-white">86</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Ancianos y SM</p>
+        </div>
+        <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-8 h-8 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-person-walking-luggage text-sm"></i>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-800 dark:text-white">142</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Precursores</p>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="space-y-3">
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Acciones Rápidas</h2>
+        <div class="grid grid-cols-2 gap-3">
+            <button class="flex items-center justify-center gap-2 bg-primary text-white py-3 px-4 rounded-xl font-medium shadow-md hover:bg-blue-700 transition-all active:scale-95" id="btn-new-congregation">
+                <i class="fa-solid fa-plus"></i>
+                <span>Nueva Congregación</span>
+            </button>
+            <button class="flex items-center justify-center gap-2 bg-secondary text-white py-3 px-4 rounded-xl font-medium shadow-md hover:bg-green-700 transition-all active:scale-95" id="btn-import-excel">
+                <i class="fa-solid fa-file-import"></i>
+                <span>Importar Excel</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Congregation List -->
+    <section class="space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white">Lista de Congregaciones</h2>
+            <div class="relative">
+                <input class="pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border-none rounded-full text-sm shadow-sm focus:ring-2 focus:ring-primary w-40 md:w-64 dark:text-white" id="search-input" placeholder="Buscar..." type="text"/>
+                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="congregation-list-container">
+            <!-- Card 1 -->
+            <div class="congregation-card bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:border-primary/30 transition-all" data-name="Villa del Mar Norte">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="font-bold text-gray-800 dark:text-white text-base">Villa del Mar Norte</h3>
+                        <p class="text-xs text-gray-400">ID: 10425-S</p>
+                    </div>
+                    <span class="badge cursor-help px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase" title="Todos los informes mensuales han sido procesados satisfactoriamente.">Stats Cargadas</span>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-xs dark:text-gray-300">
+                        <span class="text-gray-500 dark:text-gray-400">Publicadores</span>
+                        <span class="font-semibold">98</span>
+                    </div>
+                    <div class="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-primary h-full" style="width: 85%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">Gestionar S-21</button>
+                    <button class="w-10 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 transition-colors">
+                        <i class="fa-solid fa-chart-line"></i>
                     </button>
-<button class="w-10 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 transition-colors">
-<i class="fa-solid fa-chart-line"></i>
-</button>
-</div>
-</div>
-<!-- Congregation Card 2 -->
-<div class="congregation-card bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:border-primary/30 transition-all" data-name="El Arrayán">
-<div class="flex justify-between items-start mb-3">
-<div>
-<h3 class="font-bold text-gray-800 dark:text-white text-base">El Arrayán</h3>
-<p class="text-xs text-gray-400">ID: 10450-A</p>
-</div>
-<span class="badge cursor-help px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full uppercase" title="Faltan informes S-21 del mes actual.">Pendiente S-21</span>
-</div>
-<div class="space-y-2 mb-4">
-<div class="flex justify-between text-xs dark:text-gray-300">
-<span class="text-gray-500 dark:text-gray-400">Publicadores</span>
-<span class="font-semibold">72</span>
-</div>
-<div class="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-<div class="bg-amber-400 h-full" style="width: 40%"></div>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">
-                        Gestionar S-21
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="congregation-card bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:border-primary/30 transition-all" data-name="El Arrayán">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="font-bold text-gray-800 dark:text-white text-base">El Arrayán</h3>
+                        <p class="text-xs text-gray-400">ID: 10450-A</p>
+                    </div>
+                    <span class="badge cursor-help px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full uppercase" title="Faltan informes S-21 del mes actual.">Pendiente S-21</span>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-xs dark:text-gray-300">
+                        <span class="text-gray-500 dark:text-gray-400">Publicadores</span>
+                        <span class="font-semibold">72</span>
+                    </div>
+                    <div class="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-amber-400 h-full" style="width: 40%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">Gestionar S-21</button>
+                    <button class="w-10 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 transition-colors">
+                        <i class="fa-solid fa-chart-line"></i>
                     </button>
-<button class="w-10 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 transition-colors">
-<i class="fa-solid fa-chart-line"></i>
-</button>
-</div>
-</div>
-<!-- Congregation Card 3 -->
-<div class="congregation-card bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:border-primary/30 transition-all" data-name="Puente Negro Central">
-<div class="flex justify-between items-start mb-3">
-<div>
-<h3 class="font-bold text-gray-800 dark:text-white text-base">Puente Negro Central</h3>
-<p class="text-xs text-gray-400">ID: 10488-C</p>
-</div>
-<span class="badge cursor-help px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase" title="Todos los informes mensuales han sido procesados satisfactoriamente.">Stats Cargadas</span>
-</div>
-<div class="space-y-2 mb-4">
-<div class="flex justify-between text-xs dark:text-gray-300">
-<span class="text-gray-500 dark:text-gray-400">Publicadores</span>
-<span class="font-semibold">112</span>
-</div>
-<div class="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-<div class="bg-primary h-full" style="width: 95%"></div>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">
-                        Gestionar S-21
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="congregation-card bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 hover:border-primary/30 transition-all" data-name="Puente Negro Central">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="font-bold text-gray-800 dark:text-white text-base">Puente Negro Central</h3>
+                        <p class="text-xs text-gray-400">ID: 10488-C</p>
+                    </div>
+                    <span class="badge cursor-help px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase" title="Todos los informes mensuales han sido procesados satisfactoriamente.">Stats Cargadas</span>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between text-xs dark:text-gray-300">
+                        <span class="text-gray-500 dark:text-gray-400">Publicadores</span>
+                        <span class="font-semibold">112</span>
+                    </div>
+                    <div class="w-full bg-gray-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-primary h-full" style="width: 95%"></div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">Gestionar S-21</button>
+                    <button class="w-10 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 transition-colors">
+                        <i class="fa-solid fa-chart-line"></i>
                     </button>
-<button class="w-10 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 transition-colors">
-<i class="fa-solid fa-chart-line"></i>
-</button>
-</div>
-</div>
-</div>
-</section>
-<!-- END: CongregationList -->
-<!-- BEGIN: FileProcessingSection -->
-<section class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 transition-all duration-300" data-purpose="processing-area" id="universal-drop-zone">
-<div class="flex items-center justify-between mb-6">
-<div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">cloud_upload</span>
-<h2 class="text-lg font-bold text-gray-800 dark:text-white">Carga Inteligente de Datos</h2>
-</div>
-<span class="text-[10px] font-bold text-primary bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full uppercase tracking-tighter">Soporta PDF, XLSX, JPG</span>
-</div>
-<div class="grid md:grid-cols-3 gap-6">
-<!-- PDF Drop Zone -->
-<div class="drop-target relative border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-primary hover:bg-blue-50/30 transition-all group cursor-pointer" data-type="pdf">
-<div class="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 text-primary rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
-<span class="material-symbols-outlined text-3xl">picture_as_pdf</span>
-</div>
-<p class="font-bold text-gray-700 dark:text-gray-200">Extraer S-21</p>
-<p class="text-[11px] text-gray-400 mt-1">Arrastra el informe PDF aquí</p>
-<div class="processing-overlay hidden absolute inset-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-10">
-<div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-2"></div>
-<p class="text-xs font-bold text-primary">Analizando PDF...</p>
-</div>
-</div>
-<!-- Excel Drop Zone -->
-<div class="drop-target relative border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-secondary hover:bg-green-50/30 transition-all group cursor-pointer" data-type="excel">
-<div class="w-14 h-14 bg-green-50 dark:bg-green-900/30 text-secondary rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
-<span class="material-symbols-outlined text-3xl">table_chart</span>
-</div>
-<p class="font-bold text-gray-700 dark:text-gray-200">Sincronizar Excel</p>
-<p class="text-[11px] text-gray-400 mt-1">Carga base histórica .xlsx</p>
-<div class="processing-overlay hidden absolute inset-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-10">
-<div class="w-8 h-8 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-2"></div>
-<p class="text-xs font-bold text-secondary">Mapeando celdas...</p>
-</div>
-</div>
-<!-- Image/OCR Drop Zone -->
-<div class="drop-target relative border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-purple-500 hover:bg-purple-50/30 transition-all group cursor-pointer" data-type="image">
-<div class="w-14 h-14 bg-purple-50 dark:bg-purple-900/30 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
-<span class="material-symbols-outlined text-3xl">add_a_photo</span>
-</div>
-<p class="font-bold text-gray-700 dark:text-gray-200">Captura de Imagen</p>
-<p class="text-[11px] text-gray-400 mt-1">Fotos de reportes escritos</p>
-<div class="processing-overlay hidden absolute inset-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-10">
-<div class="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-<p class="text-xs font-bold text-purple-600">Escaneando OCR...</p>
-</div>
-</div>
-</div>
-<div class="fixed inset-0 bg-primary/10 border-4 border-dashed border-primary z-[60] flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" id="drop-overlay">
-<div class="bg-white dark:bg-slate-800 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
-<span class="material-symbols-outlined text-primary text-4xl animate-bounce">file_download</span>
-<span class="text-xl font-bold text-primary">Suelta tus archivos aquí</span>
-</div>
-</div>
-</section>
-<!-- END: FileProcessingSection -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- File Processing Section -->
+    <section class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 transition-all duration-300" id="universal-drop-zone">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">cloud_upload</span>
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Carga Inteligente de Datos</h2>
+            </div>
+            <span class="text-[10px] font-bold text-primary bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full uppercase tracking-tighter">Soporta PDF, XLSX, JPG</span>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="drop-target relative border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-primary hover:bg-blue-50/30 transition-all group cursor-pointer" data-type="pdf">
+                <div class="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 text-primary rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                    <span class="material-symbols-outlined text-3xl">picture_as_pdf</span>
+                </div>
+                <p class="font-bold text-gray-700 dark:text-gray-200">Extraer S-21</p>
+                <p class="text-[11px] text-gray-400 mt-1">Arrastra el informe PDF aquí</p>
+                <div class="processing-overlay hidden bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl">
+                    <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mb-2"></div>
+                    <p class="text-xs font-bold text-primary">Analizando PDF...</p>
+                </div>
+            </div>
+            <div class="drop-target relative border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-secondary hover:bg-green-50/30 transition-all group cursor-pointer" data-type="excel">
+                <div class="w-14 h-14 bg-green-50 dark:bg-green-900/30 text-secondary rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                    <span class="material-symbols-outlined text-3xl">table_chart</span>
+                </div>
+                <p class="font-bold text-gray-700 dark:text-gray-200">Sincronizar Excel</p>
+                <p class="text-[11px] text-gray-400 mt-1">Carga base histórica .xlsx</p>
+                <div class="processing-overlay hidden bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl">
+                    <div class="w-8 h-8 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-2"></div>
+                    <p class="text-xs font-bold text-secondary">Mapeando celdas...</p>
+                </div>
+            </div>
+            <div class="drop-target relative border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-purple-500 hover:bg-purple-50/30 transition-all group cursor-pointer" data-type="image">
+                <div class="w-14 h-14 bg-purple-50 dark:bg-purple-900/30 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                    <span class="material-symbols-outlined text-3xl">add_a_photo</span>
+                </div>
+                <p class="font-bold text-gray-700 dark:text-gray-200">Captura de Imagen</p>
+                <p class="text-[11px] text-gray-400 mt-1">Fotos de reportes escritos</p>
+                <div class="processing-overlay hidden bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm rounded-2xl">
+                    <div class="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                    <p class="text-xs font-bold text-purple-600">Escaneando OCR...</p>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
-<!-- BEGIN: BottomNavigation -->
-<nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-t border-gray-100 dark:border-slate-700 px-6 py-2 flex items-center justify-between z-50" data-purpose="bottom-nav">
-<a class="flex flex-col items-center gap-1 nav-active" href="#">
-<i class="fa-solid fa-house-chimney text-xl"></i>
-<span class="text-[10px]">Inicio</span>
-</a>
-<a class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
-<i class="fa-solid fa-layer-group text-xl"></i>
-<span class="text-[10px]">Gestionar</span>
-</a>
-<a class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
-<i class="fa-solid fa-chart-pie text-xl"></i>
-<span class="text-[10px]">Informes</span>
-</a>
-<a class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
-<i class="fa-solid fa-gear text-xl"></i>
-<span class="text-[10px]">Ajustes</span>
-</a>
+
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-t border-gray-100 dark:border-slate-700 px-6 py-2 flex items-center justify-between z-50">
+    <a class="flex flex-col items-center gap-1 nav-active" href="#">
+        <i class="fa-solid fa-house-chimney text-xl"></i>
+        <span class="text-[10px]">Inicio</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
+        <i class="fa-solid fa-layer-group text-xl"></i>
+        <span class="text-[10px]">Gestionar</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
+        <i class="fa-solid fa-chart-pie text-xl"></i>
+        <span class="text-[10px]">Informes</span>
+    </a>
+    <a class="flex flex-col items-center gap-1 text-gray-400 hover:text-primary transition-colors" href="#">
+        <i class="fa-solid fa-gear text-xl"></i>
+        <span class="text-[10px]">Ajustes</span>
+    </a>
 </nav>
-<!-- END: BottomNavigation -->
-<!-- MODAL: Nueva Congregación -->
+
+<!-- Modal: Nueva Congregación -->
 <div class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" id="modal-new-cong">
-<div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300">
-<h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Nueva Congregación</h2>
-<div class="space-y-4">
-<div>
-<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Nombre</label>
-<input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="new-cong-name" placeholder="Ej: Las Acacias" type="text"/>
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Nueva Congregación</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Nombre</label>
+                <input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="new-cong-name" placeholder="Ej: Las Acacias" type="text"/>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">ID (Número)</label>
+                <input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="new-cong-id" placeholder="Ej: 10500" type="text"/>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button class="flex-1 py-3 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-gray-300 rounded-xl" id="close-modal-new">Cancelar</button>
+                <button class="flex-1 py-3 text-sm font-bold text-white bg-primary rounded-xl" id="save-new-cong">Guardar</button>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">ID (Número)</label>
-<input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="new-cong-id" placeholder="Ej: 10500" type="text"/>
-</div>
-<div class="flex gap-3 mt-6">
-<button class="flex-1 py-3 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-gray-300 rounded-xl" id="close-modal-new">Cancelar</button>
-<button class="flex-1 py-3 text-sm font-bold text-white bg-primary rounded-xl" id="save-new-cong">Guardar</button>
-</div>
-</div>
-</div>
-</div>
-<!-- MODAL: Edit Identity -->
+
+<!-- Modal: Edit Identity -->
 <div class="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" id="modal-identity">
-<div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300">
-<h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Editar Identidad</h2>
-<div class="space-y-4">
-<div>
-<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Título de la App</label>
-<input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="edit-main-title" type="text"/>
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-4">Editar Identidad</h2>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Título de la App</label>
+                <input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="edit-main-title" type="text"/>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Subtítulo / Siervo de Circuito</label>
+                <input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="edit-sub-title" type="text"/>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button class="flex-1 py-3 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-gray-300 rounded-xl" id="close-modal-id">Cerrar</button>
+                <button class="flex-1 py-3 text-sm font-bold text-white bg-primary rounded-xl" id="save-identity">Actualizar</button>
+            </div>
+        </div>
+    </div>
 </div>
-<div>
-<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Subtítulo / Siervo de Circuito</label>
-<input class="w-full px-4 py-2 border border-gray-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-primary outline-none dark:bg-slate-700 dark:text-white" id="edit-sub-title" type="text"/>
+
+<!-- Drop Overlay -->
+<div class="fixed inset-0 bg-primary/10 border-4 border-dashed border-primary z-[60] flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300" id="drop-overlay">
+    <div class="bg-white dark:bg-slate-800 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3">
+        <span class="material-symbols-outlined text-primary text-4xl animate-bounce">file_download</span>
+        <span class="text-xl font-bold text-primary">Suelta tus archivos aquí</span>
+    </div>
 </div>
-<div class="flex gap-3 mt-6">
-<button class="flex-1 py-3 text-sm font-bold text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-gray-300 rounded-xl" id="close-modal-id">Cerrar</button>
-<button class="flex-1 py-3 text-sm font-bold text-white bg-primary rounded-xl" id="save-identity">Actualizar</button>
-</div>
-</div>
-</div>
-</div>
+
 <!-- Toast Container -->
 <div class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] pointer-events-none flex flex-col gap-2" id="toast-container"></div>
-<!-- BEGIN: InteractiveScripts -->
-<script data-purpose="ui-interactions">
+
+<script>
     // --- Utilities & State ---
     const showToast = (message, type = 'info') => {
         const toast = document.createElement('div');
@@ -381,7 +417,7 @@
     // --- Dark Mode Logic ---
     const darkModeBtn = document.getElementById('darkModeToggle');
     const html = document.documentElement;
-    
+
     const setDarkMode = (isDark) => {
         if (isDark) {
             html.classList.add('dark');
@@ -394,7 +430,6 @@
         }
     };
 
-    // Init theme
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         setDarkMode(true);
     }
@@ -403,12 +438,12 @@
         setDarkMode(!html.classList.contains('dark'));
     });
 
-    // --- Identity Config (localStorage) ---
+    // --- Identity Config ---
     const mainTitleEl = document.getElementById('main-title');
     const subTitleEl = document.getElementById('sub-title');
     const identityContainer = document.getElementById('identity-container');
     const modalId = document.getElementById('modal-identity');
-    
+
     const loadIdentity = () => {
         const savedTitle = localStorage.getItem('app-title') || 'CHI-03 Admin';
         const savedSub = localStorage.getItem('app-sub') || 'Gestión de Circuito';
@@ -442,7 +477,7 @@
     // --- New Congregation Modal ---
     const btnNewCong = document.getElementById('btn-new-congregation');
     const modalNew = document.getElementById('modal-new-cong');
-    
+
     btnNewCong.addEventListener('click', () => {
         modalNew.classList.remove('opacity-0', 'pointer-events-none');
         modalNew.querySelector('div').classList.remove('scale-95');
@@ -479,17 +514,14 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">
-                    Gestionar S-21
-                </button>
+                <button class="btn-manage-s21 flex-1 py-2 text-xs font-semibold bg-gray-50 dark:bg-slate-700 text-primary dark:text-blue-400 rounded-lg hover:bg-primary hover:text-white transition-colors">Gestionar S-21</button>
                 <button class="w-10 h-9 flex items-center justify-center bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600 transition-colors">
                     <i class="fa-solid fa-chart-line"></i>
                 </button>
             </div>
         `;
         container.prepend(newCard);
-        
-        // Update stats
+
         const statEl = document.getElementById('stat-congregations');
         statEl.textContent = parseInt(statEl.textContent) + 1;
 
@@ -497,8 +529,6 @@
         document.getElementById('new-cong-name').value = '';
         document.getElementById('new-cong-id').value = '';
         showToast('Congregación añadida', 'success');
-        
-        // Re-attach event listeners for dynamic content
         attachS21Events();
     });
 
@@ -514,29 +544,20 @@
 
     // --- File Processing Logic ---
     const dropTargets = document.querySelectorAll('.drop-target');
-    
+
     function processFile(target, duration = 2000) {
         const overlay = target.querySelector('.processing-overlay');
         overlay.classList.remove('hidden');
-        
+
         setTimeout(() => {
-            overlay.innerHTML = `
-                <span class="material-symbols-outlined text-3xl text-green-500 mb-1">check_circle</span>
-                <p class="text-xs font-bold text-green-600">¡Completado!</p>
-            `;
+            overlay.innerHTML = `<span class="material-symbols-outlined text-3xl text-green-500 mb-1">check_circle</span><p class="text-xs font-bold text-green-600">¡Completado!</p>`;
             setTimeout(() => {
                 overlay.classList.add('hidden');
-                // Restore original overlay content
                 const type = target.getAttribute('data-type');
-                let color = 'primary';
-                let text = 'Analizando PDF...';
+                let color = 'primary', text = 'Analizando PDF...';
                 if(type === 'excel') { color = 'secondary'; text = 'Mapeando celdas...'; }
                 if(type === 'image') { color = 'purple-500'; text = 'Escaneando OCR...'; }
-                
-                overlay.innerHTML = `
-                    <div class="w-8 h-8 border-4 border-${color} border-t-transparent rounded-full animate-spin mb-2"></div>
-                    <p class="text-xs font-bold text-${color}">${text}</p>
-                `;
+                overlay.innerHTML = `<div class="w-8 h-8 border-4 border-${color} border-t-transparent rounded-full animate-spin mb-2"></div><p class="text-xs font-bold text-${color}">${text}</p>`;
                 showToast(`Archivo ${type.toUpperCase()} procesado con éxito`, 'success');
             }, 1500);
         }, duration);
@@ -562,25 +583,27 @@
     }
     attachS21Events();
 
-    // --- Global Drag & Drop Feedback ---
+    // --- Global Drag & Drop ---
     const dropOverlay = document.getElementById('drop-overlay');
-    window.addEventListener('dragenter', (e) => {
-        e.preventDefault();
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        document.body.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    document.body.addEventListener('dragenter', () => {
         dropOverlay.classList.remove('opacity-0');
     });
 
-    window.addEventListener('dragover', (e) => {
-        e.preventDefault();
-    });
-
-    window.addEventListener('dragleave', (e) => {
-        if (e.relatedTarget === null || e.relatedTarget.nodeName === 'HTML') {
+    document.body.addEventListener('dragleave', (e) => {
+        if (e.relatedTarget === null) {
             dropOverlay.classList.add('opacity-0');
         }
     });
 
-    window.addEventListener('drop', (e) => {
-        e.preventDefault();
+    document.body.addEventListener('drop', (e) => {
         dropOverlay.classList.add('opacity-0');
         const files = e.dataTransfer.files;
         if (files.length > 0) {
@@ -589,13 +612,15 @@
             let type = 'image';
             if (ext === 'pdf') type = 'pdf';
             else if (['xlsx', 'xls', 'csv'].includes(ext)) type = 'excel';
-            
+
             const target = document.querySelector(`.drop-target[data-type="${type}"]`);
             if (target) processFile(target, 3000);
             else showToast('Formato no soportado', 'error');
         }
     });
 
+    // GitHub Pages compatibility check
+    console.log('CHI-03 Admin loaded successfully on:', window.location.href);
 </script>
-<!-- END: InteractiveScripts -->
-</body></html>
+</body>
+</html>
